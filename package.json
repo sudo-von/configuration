@@ -15,7 +15,7 @@
     "url": "git+https://github.com/sudo-von/configuration.git"
   },
   "license": "MIT",
-  "author": "VoN",
+  "author": "Jesús Ángel Rodríguez Martínez",
   "main": "index.js",
   "scripts": {}
 }
