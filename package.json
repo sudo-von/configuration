@@ -24,6 +24,7 @@
     "start:clean": "rimraf dist"
   },
   "devDependencies": {
+    "@sudo-von/core": "github:sudo-von/core#v0.6.0",
     "@types/node": "^22.15.30",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
