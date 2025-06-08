@@ -1,0 +1,21 @@
+{
+  "name": "@sudo-von/configuration",
+  "version": "0.0.0",
+  "description": "Provides a lightweight and reusable configuration service for managing environment variables.",
+  "keywords": [
+    "@sudo-von",
+    "configuration"
+  ],
+  "homepage": "https://github.com/sudo-von/configuration#readme",
+  "bugs": {
+    "url": "https://github.com/sudo-von/configuration/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sudo-von/configuration.git"
+  },
+  "license": "MIT",
+  "author": "VoN",
+  "main": "index.js",
+  "scripts": {}
+}
