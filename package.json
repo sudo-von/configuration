@@ -1,6 +1,6 @@
 {
   "name": "@sudo-von/configuration",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Provides a lightweight and reusable configuration service for managing environment variables.",
   "keywords": [
     "@sudo-von",
