@@ -1,28 +1,53 @@
 import { CoreError } from '@sudo-von/core';
 
 /**
- * Error thrown when a configuration value that is expected to be numeric is not valid.
- *
- * This error occurs when the environment variable is defined but contains a non-numeric value.
- *
- * @param configuration - The name of the configuration variable.
- * @param value - The actual value retrieved from the environment that failed numeric validation.
+ * Error thrown when the configuration file is not found at the expected path.
  */
-export class InvalidConfigurationAsNumberError extends CoreError {
-  constructor(configuration: string, value: string) {
-    super(`Invalid value '${value}' for '${configuration}' configuration. It must be a valid number.`);
+export class ConfigurationFileNotFoundError extends CoreError {
+  /**
+   * @param filename - The name of the missing configuration file.
+   * @param path - The full path where the file was expected.
+   */
+  constructor(filename: string, path: string) {
+    super(`Configuration file '${filename}' was not found at path: ${path}.`);
   }
 }
 
 /**
- * Error thrown when a required configuration value is missing from the environment.
- *
- * This is typically used during application startup to indicate that a critical environment variable
- * has not been defined or set.
- *
- * @param configuration - The name of the missing configuration variable (e.g., 'DATABASE_URL').
+ * Error thrown when the configuration file exists but is not readable.
+ */
+export class ConfigurationFileNotReadableError extends CoreError {
+  /**
+   * @param filename - The name of the configuration file.
+   * @param path - The full path to the configuration file.
+   * @param reason - The reason reading failed.
+   */
+  constructor(filename: string, path: string, reason: string) {
+    super(`Configuration file '${filename}' is not readable at path: ${path}, reason: ${reason}.`);
+  }
+}
+
+/**
+ * Error thrown when the configuration file cannot be parsed.
+ */
+export class FailedToParseConfigurationFileError extends CoreError {
+  /**
+   * @param filename - The name of the configuration file.
+   * @param path - The full path to the configuration file.
+   * @param reason - The reason parsing failed.
+   */
+  constructor(filename: string, path: string, reason: string) {
+    super(`Failed to parse configuration file '${filename}' at ${path}: ${reason}.`);
+  }
+}
+
+/**
+ * Error thrown when a required configuration value is missing from the environment
  */
 export class MissingConfigurationError extends CoreError {
+  /**
+   * @param configuration - The name of the missing configuration variable.
+   */
   constructor(configuration: string) {
     super(`Missing required configuration: '${configuration}'.`);
   }
