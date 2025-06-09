@@ -16,20 +16,25 @@
   },
   "license": "MIT",
   "author": "Jesús Ángel Rodríguez Martínez",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run start:clean && npm run start:build",
     "start:build": "tsc",
-    "start:clean": "rimraf dist"
-  },
-  "devDependencies": {
-    "@sudo-von/core": "github:sudo-von/core#v0.6.0",
-    "@types/node": "^22.15.30",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.8.3"
+    "start:clean": "rimraf dist",
+    "start:test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
   "dependencies": {
+    "@sudo-von/core": "github:sudo-von/core#v0.7.0",
     "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.30",
+    "jest": "^29.7.0",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.3.4",
+    "typescript": "^5.8.3"
   }
 }
