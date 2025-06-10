@@ -1,21 +1,22 @@
 import dotenv from "dotenv";
-import path from "path";
 import fs from "fs";
 import { Key, Configuration, Shape } from "./types";
 import { AbstractConfiguration } from "./abstract";
 import {
-  ConfigurationFileNotFoundError,
+  ConfigurationAlreadyIngestedError,
   ConfigurationFileNotReadableError,
+  ConfigurationNotIngestedError,
   FailedToParseConfigurationFileError,
   MissingConfigurationError,
+  MissingConfigurationFileError,
 } from "./errors";
 
-class ConfigurationService extends AbstractConfiguration {
+export class ConfigurationService extends AbstractConfiguration {
   protected static instance: ConfigurationService;
+  protected static isIngested: boolean = false;
 
   private constructor() {
     super();
-    this.load();
   }
 
   public get<S extends Shape>(key: Key<Configuration<S>>): string {
@@ -27,39 +28,39 @@ class ConfigurationService extends AbstractConfiguration {
   }
 
   public static getInstance(): ConfigurationService {
+    if (!ConfigurationService.isIngested) {
+      throw new ConfigurationNotIngestedError();
+    }
+
     if (!ConfigurationService.instance) {
       ConfigurationService.instance = new ConfigurationService();
     }
     return ConfigurationService.instance;
   }
 
-  protected load() {
-    const filename = ".env";
-    const workingDirectory = process.cwd();
-    const filePath = path.join(workingDirectory, filename);
+  public static ingest(path: string): void {
+    if (ConfigurationService.isIngested) {
+      throw new ConfigurationAlreadyIngestedError(path);
+    }
 
-    if (!fs.existsSync(filePath)) {
-      throw new ConfigurationFileNotFoundError(filename, filePath);
+    const fileExists = fs.existsSync(path);
+    if (!fileExists) {
+      throw new MissingConfigurationFileError(path);
     }
 
     try {
-      fs.accessSync(filePath, fs.constants.R_OK);
+      fs.accessSync(path, fs.constants.R_OK);
     } catch (e) {
-      const error = e as Error;
-      throw new ConfigurationFileNotReadableError(
-        filename,
-        filePath,
-        error.message
-      );
+      const { message } = e as Error;
+      throw new ConfigurationFileNotReadableError(path, message);
     }
 
-    const { error } = dotenv.config({ path: filePath });
+    const { error } = dotenv.config({ path });
     if (error) {
-      throw new FailedToParseConfigurationFileError(
-        filename,
-        filePath,
-        error.message
-      );
+      const { message } = error;
+      throw new FailedToParseConfigurationFileError(path, message);
     }
+
+    ConfigurationService.isIngested = true;
   }
 }

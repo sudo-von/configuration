@@ -3,6 +3,18 @@ import { Configuration, Key, Shape } from "./types";
 
 export abstract class AbstractConfiguration {
   /**
+   * Singleton instance of the configuration service.
+   * Ensures that only one instance exists throughout the application lifecycle.
+   */
+  protected static instance: AbstractConfiguration;
+
+  /**
+   * Indicates whether the environment variables have been ingested.
+   * This is used to ensure that the ingest operation is only performed once.
+   */
+  protected static isIngested?: boolean;
+
+  /**
    * Prevents direct instantiation of the abstract class.
    */
   protected constructor() { }
@@ -16,13 +28,11 @@ export abstract class AbstractConfiguration {
    *
    * @returns The corresponding configuration value as a string.
    */
-  public get<S extends Shape>(_key: Key<Configuration<S>>): string {
-    throw new MethodNotImplementedYetError("getConfiguration");
-  }
+  public abstract get<S extends Shape>(key: Key<Configuration<S>>): string;
 
   /**
    * Returns the singleton instance of the ConfigurationService.
-   * 
+   *
    * @returns The singleton instance.
    */
   public static getInstance(): AbstractConfiguration {
@@ -30,10 +40,11 @@ export abstract class AbstractConfiguration {
   }
 
   /**
-   * Loads the environment variables from a file.
-   * For now, passing a path as a parameter is not planned;
+   * Ingests environment variables from a file.
+   *
+   * @param path - Path to the environment file.
    */
-  protected load(): void {
-    throw new MethodNotImplementedYetError("load");
+  public static ingest(_path: string): void {
+    throw new MethodNotImplementedYetError("ingest");
   }
 }
