@@ -1,40 +1,33 @@
-import { CoreError } from '@sudo-von/core';
+import { CoreError } from "@sudo-von/core";
 /**
- * Error thrown when the configuration file is not found at the expected path.
+ * Error thrown when the environment variables have already been ingested.
  */
-export class ConfigurationFileNotFoundError extends CoreError {
+export class ConfigurationAlreadyIngestedError extends CoreError {
     /**
-     * @param filename - The name of the missing configuration file.
-     * @param path - The full path where the file was expected.
+     * @param path - Path that was passed during the repeated ingestion attempt.
      */
-    constructor(filename, path) {
-        super(`Configuration file '${filename}' was not found at path: ${path}.`);
+    constructor(path) {
+        super(`Configuration has already been ingested. Duplicate call attempted with path: ${path}.`);
     }
 }
 /**
- * Error thrown when the configuration file exists but is not readable.
+ * Error thrown when the configuration file exists but cannot be read due to insufficient permissions.
  */
-export class ConfigurationFileNotReadableError extends CoreError {
+export class ConfigurationFilePermissionError extends CoreError {
     /**
-     * @param filename - The name of the configuration file.
      * @param path - The full path to the configuration file.
-     * @param reason - The reason reading failed.
+     * @param message - The underlying system message explaining the permission issue.
      */
-    constructor(filename, path, reason) {
-        super(`Configuration file '${filename}' is not readable at path: ${path}, reason: ${reason}.`);
+    constructor(path, message) {
+        super(`Insufficient permissions to read configuration file at path: ${path}, message: ${message}.`);
     }
 }
 /**
- * Error thrown when the configuration file cannot be parsed.
+ * Error thrown when configuration is accessed before ingestion.
  */
-export class FailedToParseConfigurationFileError extends CoreError {
-    /**
-     * @param filename - The name of the configuration file.
-     * @param path - The full path to the configuration file.
-     * @param reason - The reason parsing failed.
-     */
-    constructor(filename, path, reason) {
-        super(`Failed to parse configuration file '${filename}' at ${path}: ${reason}.`);
+export class ConfigurationNotIngestedError extends CoreError {
+    constructor() {
+        super("Cannot obtain configuration instance before ingestion.");
     }
 }
 /**
@@ -46,6 +39,29 @@ export class MissingConfigurationError extends CoreError {
      */
     constructor(configuration) {
         super(`Missing required configuration: '${configuration}'.`);
+    }
+}
+/**
+ * Error thrown when the configuration file is missing at the given path.
+ */
+export class MissingConfigurationFileError extends CoreError {
+    /**
+     * @param path - The full path where the configuration file was expected.
+     */
+    constructor(path) {
+        super(`Configuration file was not found at path: ${path}.`);
+    }
+}
+/**
+ * Error thrown when an unexpected or unknown error occurs while loading the configuration file.
+ */
+export class UnknownConfigurationFileError extends CoreError {
+    /**
+     * @param path - The full path to the configuration file.
+     * @param message - A description of the underlying error.
+     */
+    constructor(path, message) {
+        super(`An unknown error occurred while loading the configuration file at path: ${path}, message: ${message}.`);
     }
 }
 //# sourceMappingURL=errors.js.map

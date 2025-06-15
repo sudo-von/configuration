@@ -1,12 +1,10 @@
 import dotenv from "dotenv";
-import path from "path";
-import fs from "fs";
 import { AbstractConfiguration } from "./abstract";
-import { ConfigurationFileNotFoundError, ConfigurationFileNotReadableError, FailedToParseConfigurationFileError, MissingConfigurationError, } from "./errors";
-class ConfigurationService extends AbstractConfiguration {
+import { ConfigurationAlreadyIngestedError, ConfigurationFilePermissionError, ConfigurationNotIngestedError, MissingConfigurationError, MissingConfigurationFileError, UnknownConfigurationFileError, } from "./errors";
+import { hasCode } from "./helper";
+export class ConfigurationService extends AbstractConfiguration {
     constructor() {
         super();
-        this.load();
     }
     get(key) {
         const value = process.env[key];
@@ -16,29 +14,35 @@ class ConfigurationService extends AbstractConfiguration {
         return value;
     }
     static getInstance() {
+        if (!ConfigurationService.isIngested) {
+            throw new ConfigurationNotIngestedError();
+        }
         if (!ConfigurationService.instance) {
             ConfigurationService.instance = new ConfigurationService();
         }
         return ConfigurationService.instance;
     }
-    load() {
-        const filename = ".env";
-        const workingDirectory = process.cwd();
-        const filePath = path.join(workingDirectory, filename);
-        if (!fs.existsSync(filePath)) {
-            throw new ConfigurationFileNotFoundError(filename, filePath);
+    static ingest(path) {
+        if (ConfigurationService.isIngested) {
+            throw new ConfigurationAlreadyIngestedError(path);
         }
-        try {
-            fs.accessSync(filePath, fs.constants.R_OK);
-        }
-        catch (e) {
-            const error = e;
-            throw new ConfigurationFileNotReadableError(filename, filePath, error.message);
-        }
-        const { error } = dotenv.config({ path: filePath });
+        const { error } = dotenv.config({ path });
         if (error) {
-            throw new FailedToParseConfigurationFileError(filename, filePath, error.message);
+            const { message } = error;
+            if (!hasCode(error)) {
+                throw new UnknownConfigurationFileError(path, message);
+            }
+            const { code } = error;
+            switch (code) {
+                case "ENOENT":
+                    throw new MissingConfigurationFileError(path);
+                case "EACCES":
+                    throw new ConfigurationFilePermissionError(path, message);
+                default:
+                    throw new UnknownConfigurationFileError(path, message);
+            }
         }
+        ConfigurationService.isIngested = true;
     }
 }
 //# sourceMappingURL=service.js.map
