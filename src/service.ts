@@ -1,15 +1,15 @@
 import dotenv from "dotenv";
-import fs from "fs";
-import { Key, Configuration, Shape } from "./types";
 import { AbstractConfiguration } from "./abstract";
+import { Key, Configuration, Shape } from "./types";
 import {
   ConfigurationAlreadyIngestedError,
-  ConfigurationFileNotReadableError,
+  ConfigurationFilePermissionError,
   ConfigurationNotIngestedError,
-  FailedToParseConfigurationFileError,
   MissingConfigurationError,
   MissingConfigurationFileError,
+  UnknownConfigurationFileError,
 } from "./errors";
+import { hasCode } from "./helper";
 
 export class ConfigurationService extends AbstractConfiguration {
   protected static instance?: ConfigurationService;
@@ -42,22 +42,23 @@ export class ConfigurationService extends AbstractConfiguration {
       throw new ConfigurationAlreadyIngestedError(path);
     }
 
-    const fileExists = fs.existsSync(path);
-    if (!fileExists) {
-      throw new MissingConfigurationFileError(path);
-    }
-
-    try {
-      fs.accessSync(path, fs.constants.R_OK);
-    } catch (error) {
-      const { message } = error as Error;
-      throw new ConfigurationFileNotReadableError(path, message);
-    }
-
     const { error } = dotenv.config({ path });
     if (error) {
       const { message } = error;
-      throw new FailedToParseConfigurationFileError(path, message);
+
+      if (!hasCode(error)) {
+        throw new UnknownConfigurationFileError(path, message);
+      }
+
+      const { code } = error;
+      switch (code) {
+        case "ENOENT":
+          throw new MissingConfigurationFileError(path);
+        case "EACCES":
+          throw new ConfigurationFilePermissionError(path, message);
+        default:
+          throw new UnknownConfigurationFileError(path, message);
+      }
     }
 
     ConfigurationService.isIngested = true;
