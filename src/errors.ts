@@ -8,20 +8,24 @@ export class ConfigurationAlreadyIngestedError extends CoreError {
    * @param path - Path that was passed during the repeated ingestion attempt.
    */
   constructor(path: string) {
-    super(`Configuration has already been ingested. Duplicate call attempted with path: ${path}.`);
+    super(
+      `Configuration has already been ingested. Duplicate call attempted with path: ${path}.`
+    );
   }
 }
 
 /**
- * Error thrown when the configuration file exists but is not readable.
+ * Error thrown when the configuration file exists but cannot be read due to insufficient permissions.
  */
-export class ConfigurationFileNotReadableError extends CoreError {
+export class ConfigurationFilePermissionError extends CoreError {
   /**
    * @param path - The full path to the configuration file.
-   * @param reason - The reason reading failed.
+   * @param message - The underlying system message explaining the permission issue.
    */
-  constructor(path: string, reason: string) {
-    super(`Configuration file is not readable at path: ${path}, reason: ${reason}.`);
+  constructor(path: string, message: string) {
+    super(
+      `Insufficient permissions to read configuration file at path: ${path}, message: ${message}.`
+    );
   }
 }
 
@@ -31,19 +35,6 @@ export class ConfigurationFileNotReadableError extends CoreError {
 export class ConfigurationNotIngestedError extends CoreError {
   constructor() {
     super("Cannot obtain configuration instance before ingestion.");
-  }
-}
-
-/**
- * Error thrown when the configuration file cannot be parsed.
- */
-export class FailedToParseConfigurationFileError extends CoreError {
-  /**
-   * @param path - The full path to the configuration file.
-   * @param reason - The reason parsing failed.
-   */
-  constructor(path: string, reason: string) {
-    super(`Failed to parse configuration file at ${path}, reason: ${reason}.`);
   }
 }
 
@@ -68,5 +59,20 @@ export class MissingConfigurationFileError extends CoreError {
    */
   constructor(path: string) {
     super(`Configuration file was not found at path: ${path}.`);
+  }
+}
+
+/**
+ * Error thrown when an unexpected or unknown error occurs while loading the configuration file.
+ */
+export class UnknownConfigurationFileError extends CoreError {
+  /**
+   * @param path - The full path to the configuration file.
+   * @param message - A description of the underlying error.
+   */
+  constructor(path: string, message: string) {
+    super(
+      `An unknown error occurred while loading the configuration file at path: ${path}, message: ${message}.`
+    );
   }
 }
