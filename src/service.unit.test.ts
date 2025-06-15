@@ -1,27 +1,16 @@
 import { jest } from "@jest/globals";
 import {
-  ConfigurationFileNotReadableError,
+  ConfigurationFilePermissionError,
   ConfigurationNotIngestedError,
-  FailedToParseConfigurationFileError,
   MissingConfigurationError,
   MissingConfigurationFileError,
+  UnknownConfigurationFileError,
 } from "./errors";
 
 const configMock = jest.fn();
 jest.unstable_mockModule("dotenv", () => ({
   default: {
     config: configMock,
-  },
-}));
-
-const accessSyncMock = jest.fn();
-const existsSyncMock = jest.fn();
-const constantsMock = { R_OK: 1 };
-jest.unstable_mockModule("fs", () => ({
-  default: {
-    accessSync: accessSyncMock,
-    constants: constantsMock,
-    existsSync: existsSyncMock,
   },
 }));
 
@@ -45,8 +34,6 @@ describe("ConfigurationService", () => {
   describe("get", () => {
     describe("when the configuration has been ingested", () => {
       beforeEach(() => {
-        existsSyncMock.mockReturnValue(true);
-        accessSyncMock.mockImplementation(() => {});
         configMock.mockReturnValue({});
         ConfigurationService.ingest(path);
       });
@@ -72,8 +59,6 @@ describe("ConfigurationService", () => {
   describe("getInstance", () => {
     describe("when the configuration has been ingested", () => {
       beforeEach(() => {
-        existsSyncMock.mockReturnValue(true);
-        accessSyncMock.mockImplementation(() => {});
         configMock.mockReturnValue({});
         ConfigurationService.ingest(path);
       });
@@ -97,13 +82,11 @@ describe("ConfigurationService", () => {
   describe("ingest", () => {
     describe("when configuration has already been ingested", () => {
       beforeEach(() => {
-        existsSyncMock.mockReturnValue(true);
-        accessSyncMock.mockImplementation(() => {});
-        configMock.mockReturnValue({ error: false });
+        configMock.mockReturnValue({});
         ConfigurationService.ingest(path);
       });
 
-      it("throws a ConfigurationAlreadyIngestedError on subsequent calls", () => {
+      it("throws a ConfigurationAlreadyIngestedError if called more than once", () => {
         expect(() => ConfigurationService.ingest(path)).toThrow(
           ConfigurationAlreadyIngestedError
         );
@@ -111,38 +94,39 @@ describe("ConfigurationService", () => {
     });
 
     describe("when configuration has not been ingested", () => {
+      it("throws an UnknownConfigurationFileError if the error lacks a code property", () => {
+        configMock.mockReturnValue({ error: {} });
+
+        expect(() => ConfigurationService.ingest(path)).toThrow(
+          UnknownConfigurationFileError
+        );
+      });
+
       it("throws a MissingConfigurationFileError if the file does not exist", () => {
-        existsSyncMock.mockReturnValue(false);
+        configMock.mockReturnValue({ error: { code: "ENOENT" } });
 
         expect(() => ConfigurationService.ingest(path)).toThrow(
           MissingConfigurationFileError
         );
       });
 
-      it("throws a ConfigurationFileNotReadableError if the file is not readable", () => {
-        existsSyncMock.mockReturnValue(true);
-        accessSyncMock.mockImplementation(() => {
-          throw new Error();
-        });
+      it("throws a ConfigurationFilePermissionError if the file is not readable", () => {
+        configMock.mockReturnValue({ error: { code: "EACCES" } });
 
         expect(() => ConfigurationService.ingest(path)).toThrow(
-          ConfigurationFileNotReadableError
+          ConfigurationFilePermissionError
         );
       });
 
-      it("throws a FailedToParseConfigurationFileError if parsing the file fails", () => {
-        existsSyncMock.mockReturnValue(true);
-        accessSyncMock.mockImplementation(() => {});
-        configMock.mockReturnValue({ error: new Error() });
+      it("throws an UnknownConfigurationFileError if the error is unknown", () => {
+        configMock.mockReturnValue({ error: { code: "UNKNOWN" } });
 
         expect(() => ConfigurationService.ingest(path)).toThrow(
-          FailedToParseConfigurationFileError
+          UnknownConfigurationFileError
         );
       });
 
       it("successfully ingests when the file exists, is readable, and parses correctly", () => {
-        existsSyncMock.mockReturnValue(true);
-        accessSyncMock.mockImplementation(() => {});
         configMock.mockReturnValue({});
 
         ConfigurationService.ingest(path);
