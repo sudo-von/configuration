@@ -23,7 +23,8 @@
     "build": "npm run start:clean && npm run start:build",
     "start:build": "tsc",
     "start:clean": "rimraf dist",
-    "start:test": "node --experimental-vm-modules node_modules/.bin/jest"
+    "start:test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "start:test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage"
   },
   "dependencies": {
     "@sudo-von/core": "github:sudo-von/core#v0.7.0",

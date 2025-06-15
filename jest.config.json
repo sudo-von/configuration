@@ -1,4 +1,7 @@
 {
+  "coveragePathIgnorePatterns": [
+    "abstract\\.ts$"
+  ],  
   "extensionsToTreatAsEsm": [
     ".ts"
   ],
