@@ -12,8 +12,8 @@ import {
 } from "./errors";
 
 export class ConfigurationService extends AbstractConfiguration {
-  protected static instance: ConfigurationService;
-  protected static isIngested: boolean = false;
+  protected static instance?: ConfigurationService;
+  protected static isIngested?: boolean;
 
   private constructor() {
     super();
@@ -31,7 +31,6 @@ export class ConfigurationService extends AbstractConfiguration {
     if (!ConfigurationService.isIngested) {
       throw new ConfigurationNotIngestedError();
     }
-
     if (!ConfigurationService.instance) {
       ConfigurationService.instance = new ConfigurationService();
     }
@@ -50,8 +49,8 @@ export class ConfigurationService extends AbstractConfiguration {
 
     try {
       fs.accessSync(path, fs.constants.R_OK);
-    } catch (e) {
-      const { message } = e as Error;
+    } catch (error) {
+      const { message } = error as Error;
       throw new ConfigurationFileNotReadableError(path, message);
     }
 

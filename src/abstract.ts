@@ -4,13 +4,11 @@ import { Configuration, Key, Shape } from "./types";
 export abstract class AbstractConfiguration {
   /**
    * Singleton instance of the configuration service.
-   * Ensures that only one instance exists throughout the application lifecycle.
    */
-  protected static instance: AbstractConfiguration;
+  protected static instance?: AbstractConfiguration;
 
   /**
    * Indicates whether the environment variables have been ingested.
-   * This is used to ensure that the ingest operation is only performed once.
    */
   protected static isIngested?: boolean;
 
@@ -21,8 +19,6 @@ export abstract class AbstractConfiguration {
 
   /**
    * Retrieves a configuration value.
-   * Should throw an error if the value is not defined.
-   * For now, it is not planned to support return types other than string.
    *
    * @param key - The configuration key to retrieve.
    *
